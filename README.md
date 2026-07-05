@@ -64,7 +64,9 @@ bash
 nc -zv localhost 9092   # Kafka
 nc -zv localhost 5432   # orders_db
 nc -zv localhost 5433   # payments_db
-```bash
+
+
+
 ### Сборка и запуск микросервисов
 
 Каждый сервис собирается и запускается отдельно. Команды для фонового запуска:
