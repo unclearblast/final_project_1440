@@ -53,7 +53,6 @@ OrbitaMarket – учебный проект, реализующий ядро п
 Убедитесь, что Docker установлен и запущен.  
 В корне проекта выполните:
 
-```bash
 sudo systemctl start docker   # если ещё не запущен
 cd ~/OrbitaMarket
 sudo docker-compose down -v   # очистка старых данных (опционально)
