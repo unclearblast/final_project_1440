@@ -1,4 +1,3 @@
-cat > PROJECT.md << 'EOF'
 # OrbitaMarket – План проекта
 
 ## Цель
@@ -41,4 +40,3 @@ cat > PROJECT.md << 'EOF'
 - Docker, Docker Compose
 - Maven, JUnit 5, RestAssured, Allure
 - Gitleaks, Semgrep, OSV-Scanner
-EOF
