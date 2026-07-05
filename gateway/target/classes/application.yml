@@ -1,0 +1,22 @@
+server:
+  port: 8082
+
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: payments
+          uri: http://localhost:8080
+          predicates:
+            - Path=/api/v1/payments/**
+        - id: orders
+          uri: http://localhost:8081
+          predicates:
+            - Path=/api/v1/orders/**
+      default-filters:
+        - PreserveHostHeader
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

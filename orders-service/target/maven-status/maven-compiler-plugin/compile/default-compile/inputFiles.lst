@@ -1,0 +1,16 @@
+/home/kali/OrbitaMarket/orders-service/src/main/java/com/orbitamarket/orders/OrdersServiceApplication.java
+/home/kali/OrbitaMarket/orders-service/src/main/java/com/orbitamarket/orders/service/OrderEventConsumer.java
+/home/kali/OrbitaMarket/orders-service/src/main/java/com/orbitamarket/orders/repository/OrderRepository.java
+/home/kali/OrbitaMarket/orders-service/src/main/java/com/orbitamarket/orders/exception/GlobalExceptionHandler.java
+/home/kali/OrbitaMarket/orders-service/src/main/java/com/orbitamarket/orders/dto/OrderPaymentCompletedEvent.java
+/home/kali/OrbitaMarket/orders-service/src/main/java/com/orbitamarket/orders/entity/Order.java
+/home/kali/OrbitaMarket/orders-service/src/main/java/com/orbitamarket/orders/service/OrderService.java
+/home/kali/OrbitaMarket/orders-service/src/main/java/com/orbitamarket/orders/config/KafkaConfig.java
+/home/kali/OrbitaMarket/orders-service/src/main/java/com/orbitamarket/orders/service/OutboxPublisher.java
+/home/kali/OrbitaMarket/orders-service/src/main/java/com/orbitamarket/orders/entity/OutboxEvent.java
+/home/kali/OrbitaMarket/orders-service/src/main/java/com/orbitamarket/orders/repository/OutboxRepository.java
+/home/kali/OrbitaMarket/orders-service/src/main/java/com/orbitamarket/orders/controller/OrderController.java
+/home/kali/OrbitaMarket/orders-service/src/main/java/com/orbitamarket/orders/dto/OrderPaymentRequestedEvent.java
+/home/kali/OrbitaMarket/orders-service/src/main/java/com/orbitamarket/orders/dto/CreateOrderRequest.java
+/home/kali/OrbitaMarket/orders-service/src/main/java/com/orbitamarket/orders/dto/OrderResponse.java
+/home/kali/OrbitaMarket/orders-service/src/main/java/com/orbitamarket/orders/dto/OrderPaymentFailedEvent.java
