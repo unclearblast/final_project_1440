@@ -1,0 +1,24 @@
+@startuml
+!include <C4/C4_Container>
+
+Person(client, "Клиент", "Оператор, аналитик")
+
+System_Boundary(orbita, "OrbitaMarket") {
+    Container(gateway, "API Gateway", "Spring Cloud Gateway", "Маршрутизация запросов, проброс X-User-Id")
+    Container(payments, "Payments Service", "Spring Boot", "REST: счета, пополнение; Kafka-обработчик списаний")
+    Container(orders, "Orders Service", "Spring Boot", "REST: заказы; Outbox-публикация, обновление статусов")
+    ContainerDb(paymentsDb, "Payments DB", "PostgreSQL", "accounts, inbox")
+    ContainerDb(ordersDb, "Orders DB", "PostgreSQL", "orders, outbox")
+    Container(kafka, "Kafka", "Confluent", "Топики order.payment.requested, order.payment.completed, order.payment.failed")
+}
+
+Rel(client, gateway, "HTTP запросы", "REST/JSON")
+Rel(gateway, payments, "прокси", "HTTP")
+Rel(gateway, orders, "прокси", "HTTP")
+Rel(payments, paymentsDb, "JDBC", "")
+Rel(orders, ordersDb, "JDBC", "")
+Rel(orders, kafka, "Публикация OrderPaymentRequested", "async")
+Rel(kafka, payments, "Доставка OrderPaymentRequested", "async")
+Rel(payments, kafka, "Публикация Completed/Failed", "async")
+Rel(kafka, orders, "Доставка результата", "async")
+@enduml
