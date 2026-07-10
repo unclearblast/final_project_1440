@@ -1,7 +1,7 @@
 package com.orbitamarket.orders.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.orbitamarket.orders.dto.OrderPaymentRequestedEvent;
+import com.orbitamarket.common.dto.OrderPaymentRequestedEvent;
 import com.orbitamarket.orders.entity.OutboxEvent;
 import com.orbitamarket.orders.repository.OutboxRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +20,7 @@ public class OutboxPublisher {
 
     private final OutboxRepository outboxRepository;
     private final KafkaTemplate<String, Object> kafkaTemplate;
-    private final ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;   // бин из Spring контекста
 
     @Scheduled(fixedDelay = 5000)
     @Transactional
@@ -28,10 +28,10 @@ public class OutboxPublisher {
         List<OutboxEvent> events = outboxRepository.findByPublishedFalse();
         for (OutboxEvent event : events) {
             try {
-                // Десериализуем строку обратно в объект события
+                // Десериализуем строку из outbox обратно в объект события
                 OrderPaymentRequestedEvent requestEvent =
                         objectMapper.readValue(event.getPayload(), OrderPaymentRequestedEvent.class);
-                // Отправляем объект – он будет сериализован в JSON с заголовками типа
+                // Отправляем объект – он будет сериализован в JSON с правильными заголовками типа
                 kafkaTemplate.send("order.payment.requested",
                         requestEvent.getOrderId().toString(), requestEvent);
                 event.setPublished(true);
