@@ -48,6 +48,41 @@ OrbitaMarket – учебный проект, реализующий ядро п
 
 ## Быстрый старт
 
+### Проверка работы (Happy Path)
+
+После запуска всех сервисов выполните:
+
+```bash
+# 1. Создание счёта
+curl -s -X POST http://localhost:8082/api/v1/payments/accounts \
+  -H "X-User-Id: test-user" | jq .
+
+# 2. Пополнение баланса
+curl -s -X POST http://localhost:8082/api/v1/payments/accounts/top-up \
+  -H "X-User-Id: test-user" \
+  -H "Content-Type: application/json" \
+  -d '{"amount":1000}' | jq .
+
+# 3. Создание заказа (ARCHIVE, цена 120)
+ORDER_ID=$(curl -s -X POST http://localhost:8082/api/v1/orders \
+  -H "X-User-Id: test-user" \
+  -H "Content-Type: application/json" \
+  -d '{"productType":"ARCHIVE","price":120,"payload":"{\"aoi\":\"POLYGON((...))\"}"}' | jq -r '.orderId')
+
+echo "Заказ создан: $ORDER_ID"
+
+# 4. Пауза для асинхронной обработки (OutboxPublisher срабатывает каждые 5 секунд)
+sleep 10
+
+# 5. Проверка статуса заказа
+curl -s http://localhost:8082/api/v1/orders/$ORDER_ID \
+  -H "X-User-Id: test-user" | jq .
+
+# 6. Проверка баланса (должен уменьшиться на 120)
+curl -s http://localhost:8082/api/v1/payments/accounts/balance \
+  -H "X-User-Id: test-user" | jq .
+
+
 ### Запуск инфраструктуры (Docker Compose)
 
 Убедитесь, что Docker установлен и запущен.  
@@ -86,6 +121,13 @@ cd ~/OrbitaMarket/gateway
 mvn clean package -DskipTests
 mvn spring-boot:run > /tmp/gateway.log 2>&1 &
 После запуска всех трёх сервисов (ожидание ~30 секунд) можно обращаться к API через Gateway на порту 8082.
+
+# Общие DTO (common-dtos)
+
+Для исключения дублирования и ошибок сериализации все события, передаваемые через Kafka, вынесены в отдельный модуль **common-dtos**.  
+Классы событий (`OrderPaymentRequestedEvent`, `OrderPaymentCompletedEvent`, `OrderPaymentFailedEvent`) находятся в пакете `com.orbitamarket.common.dto` и используются обоими сервисами.
+
+Модуль подключается в `payments-service` и `orders-service` как обычная зависимость Maven.
 
 ## API Reference
 
