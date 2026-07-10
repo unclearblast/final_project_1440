@@ -52,7 +52,7 @@ OrbitaMarket – учебный проект, реализующий ядро п
 
 После запуска всех сервисов выполните:
 
-```bash
+
 # 1. Создание счёта
 curl -s -X POST http://localhost:8082/api/v1/payments/accounts \
   -H "X-User-Id: test-user" | jq .
