@@ -1,0 +1,30 @@
+@startuml
+!include <C4/C4_Container>
+
+Person(operator, "Оператор ДЗЗ", "Заказывает съёмку, архивные снимки, подписки")
+Person(analyst, "Аналитик", "Покупает готовые продукты мониторинга")
+Person(admin, "Администратор", "Управляет платформой")
+
+System_Boundary(orbita, "OrbitaMarket") {
+    Container(gateway, "API Gateway", "Spring Cloud Gateway", "Единая точка входа, маршрутизация HTTP")
+    Container(payments, "Payments Service", "Java, Spring Boot", "Счета, балансы, списания")
+    Container(orders, "Orders Service", "Java, Spring Boot", "Управление заказами, статусы")
+    ContainerDb(paymentsDb, "Payments DB", "PostgreSQL", "Хранение счетов и транзакций")
+    ContainerDb(ordersDb, "Orders DB", "PostgreSQL", "Хранение заказов и outbox")
+    Container(kafka, "Message Broker", "Kafka", "Асинхронный обмен событиями оплаты")
+}
+
+Rel(operator, gateway, "Использует", "HTTP/REST")
+Rel(analyst, gateway, "Использует", "HTTP/REST")
+Rel(admin, gateway, "Использует", "HTTP/REST")
+
+Rel(gateway, payments, "Проксирует /payments/**", "HTTP")
+Rel(gateway, orders, "Проксирует /orders/**", "HTTP")
+Rel(payments, paymentsDb, "чтение/запись", "JDBC")
+Rel(orders, ordersDb, "чтение/запись", "JDBC")
+Rel(orders, kafka, "Публикует OrderPaymentRequested", "Kafka")
+Rel(kafka, payments, "Потребляет OrderPaymentRequested", "Kafka")
+Rel(payments, kafka, "Публикует Completed/Failed", "Kafka")
+Rel(kafka, orders, "Потребляет результат", "Kafka")
+
+@enduml
