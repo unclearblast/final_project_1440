@@ -1,9 +1,10 @@
 package com.orbitamarket.payments.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.orbitamarket.payments.dto.*;
-import com.orbitamarket.payments.entity.*;
-import com.orbitamarket.payments.repository.*;
+import com.orbitamarket.common.dto.OrderPaymentRequestedEvent;
+import com.orbitamarket.payments.entity.Account;
+import com.orbitamarket.payments.entity.InboxMessage;
+import com.orbitamarket.payments.repository.AccountRepository;
+import com.orbitamarket.payments.repository.InboxRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -21,29 +22,22 @@ public class PaymentProcessor {
     private final AccountRepository accountRepository;
     private final InboxRepository inboxRepository;
     private final KafkaEventPublisher publisher;
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     private static final int MAX_RETRIES = 3;
 
     @KafkaListener(topics = "order.payment.requested", groupId = "payments-group")
     @Transactional
-    public void handlePaymentRequest(String message) {   // принимаем строку
-        OrderPaymentRequestedEvent event;
-        try {
-            event = objectMapper.readValue(message, OrderPaymentRequestedEvent.class);
-        } catch (Exception e) {
-            log.error("Failed to parse message: {}", message, e);
-            return;
-        }
-
+    public void handlePaymentRequest(OrderPaymentRequestedEvent event) {
         UUID eventId = event.getEventId();
         log.info("Processing payment request: eventId={}, orderId={}", eventId, event.getOrderId());
 
+        // Идемпотентность: если событие уже обработано — выходим
         if (inboxRepository.existsByEventId(eventId)) {
             log.info("Event already processed: {}", eventId);
             return;
         }
 
+        // Сохраняем в inbox перед обработкой
         inboxRepository.save(InboxMessage.create(eventId, event.getOrderId(), "OrderPaymentRequested"));
 
         Optional<Account> optAccount = accountRepository.findById(event.getUserId());
@@ -52,6 +46,7 @@ public class PaymentProcessor {
             return;
         }
 
+        // Попытки списания с optimistic lock
         for (int attempt = 0; attempt < MAX_RETRIES; attempt++) {
             Account account = accountRepository.findById(event.getUserId()).orElseThrow();
             if (account.getBalance() < event.getAmount()) {
